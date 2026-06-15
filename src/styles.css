@@ -888,6 +888,36 @@ body[data-role='Requester'] .navbar {
   border-bottom: none;
 }
 
+/* ============ Password field with toggle ============ */
+.password-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrap input {
+  width: 100%;
+  padding-right: 44px;
+}
+
+.eye-btn {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  border-radius: 4px;
+  transition: color var(--transition);
+}
+
+.eye-btn:hover {
+  color: var(--ink);
+}
+
 /* ============ Responsive ============ */
 @media (max-width: 880px) {
   .map-layout {
