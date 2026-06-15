@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider, useAuth } from './AuthContext'
 import { ToastProvider } from './ToastContext'
+import { NotificationsProvider } from './NotificationsContext'
 import Navbar from './components/Navbar'
 import ChatbotWidget from './components/ChatbotWidget'
 import Landing from './pages/Landing'
@@ -32,6 +33,7 @@ function RequireRole({ role, children }) {
 export default function App() {
   return (
     <AuthProvider>
+      <NotificationsProvider>
       <ToastProvider>
         <BrowserRouter>
           <RoleTheme />
@@ -87,6 +89,7 @@ export default function App() {
           </main>
         </BrowserRouter>
       </ToastProvider>
+      </NotificationsProvider>
     </AuthProvider>
   )
 }

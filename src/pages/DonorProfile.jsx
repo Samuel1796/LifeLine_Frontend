@@ -115,29 +115,27 @@ export default function DonorProfile() {
             </button>
           </div>
 
-          <div className="form-row">
-            <div className="field">
-              <label>Latitude</label>
-              <input
-                type="number"
-                step="any"
-                value={form.latitude}
-                onChange={(e) => set('latitude', e.target.value)}
-                placeholder="5.6037"
-                required
-              />
-            </div>
-            <div className="field">
-              <label>Longitude</label>
-              <input
-                type="number"
-                step="any"
-                value={form.longitude}
-                onChange={(e) => set('longitude', e.target.value)}
-                placeholder="-0.1870"
-                required
-              />
-            </div>
+          <div className="field">
+            <label>Latitude</label>
+            <input
+              type="text"
+              inputMode="decimal"
+              value={form.latitude}
+              onChange={(e) => set('latitude', e.target.value)}
+              placeholder="5.6037"
+              required
+            />
+          </div>
+          <div className="field">
+            <label>Longitude</label>
+            <input
+              type="text"
+              inputMode="decimal"
+              value={form.longitude}
+              onChange={(e) => set('longitude', e.target.value)}
+              placeholder="-0.1870"
+              required
+            />
           </div>
 
           <div className="field">

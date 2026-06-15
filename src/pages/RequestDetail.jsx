@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { api } from '../api'
 import { useAuth } from '../AuthContext'
 import { useToast } from '../ToastContext'
+import { useNotify } from '../NotificationsContext'
 import { useNotifications } from '../useNotifications'
 import { RequestCardSkeleton } from '../components/Skeletons'
 import ChatPanel from '../components/ChatPanel'
@@ -11,6 +12,7 @@ export default function RequestDetail() {
   const { id } = useParams()
   const { user } = useAuth()
   const toast = useToast()
+  const notify = useNotify()
   const [data, setData] = useState(null)
   const [busy, setBusy] = useState(false)
   const [openChatDonorId, setOpenChatDonorId] = useState(null)
@@ -35,9 +37,10 @@ export default function RequestDetail() {
     onNewMessage: (payload) => {
       if (String(payload.requestId) !== String(id)) return
       setIncomingMsg(payload)
-      // If the requester doesn't have this thread open, nudge them.
       if (user?.role === 'Requester' && Number(openChatDonorId) !== Number(payload.donorId)) {
-        toast(`New message from ${payload.message.senderName}`, 'info')
+        const msg = `New message from ${payload.message.senderName}`
+        toast(msg, 'info')
+        notify.add(msg, 'info')
         setOpenChatDonorId(payload.donorId)
       }
     },

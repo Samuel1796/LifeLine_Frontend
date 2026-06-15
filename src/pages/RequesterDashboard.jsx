@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../api'
 import { useToast } from '../ToastContext'
+import { useNotify } from '../NotificationsContext'
 import { useNotifications } from '../useNotifications'
 import DonorMap from '../components/DonorMap'
 import RequestCard from '../components/RequestCard'
@@ -13,6 +14,7 @@ const URGENCIES = ['Low', 'Medium', 'High', 'Critical']
 
 export default function RequesterDashboard() {
   const toast = useToast()
+  const notify = useNotify()
   const navigate = useNavigate()
   const [tab, setTab] = useState('donors')
 
@@ -49,7 +51,9 @@ export default function RequesterDashboard() {
   useNotifications({
     onDonorResponded: ({ donorName, bloodType, status }) => {
       if (status === 'Accepted') {
-        toast(`${donorName} (${bloodType}) accepted your request`, 'success')
+        const msg = `${donorName} (${bloodType}) accepted your request`
+        toast(msg, 'success')
+        notify.add(msg, 'success')
       }
       loadRequests()
     },

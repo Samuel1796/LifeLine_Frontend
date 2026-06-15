@@ -19,14 +19,43 @@ function CloseIcon() {
   )
 }
 
+function ChatbotSkeleton() {
+  return (
+    <div className="chatbot-skeleton">
+      <div className="chatbot-sk-header skeleton" />
+      <div className="chatbot-sk-body">
+        <div className="skeleton sk-line w60" style={{ height: 13 }} />
+        <div className="skeleton sk-line w80" style={{ height: 13 }} />
+        <div className="skeleton sk-line w40" style={{ height: 13 }} />
+        <div style={{ marginTop: 12 }}>
+          <div className="skeleton sk-line w80" style={{ height: 36, borderRadius: 8 }} />
+        </div>
+        <div style={{ marginTop: 4 }}>
+          <div className="skeleton sk-line w60" style={{ height: 36, borderRadius: 8 }} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function ChatbotWidget() {
   const [open, setOpen] = useState(false)
+  const [loaded, setLoaded] = useState(false)
+
+  function toggle() {
+    if (open) {
+      setOpen(false)
+      setLoaded(false)
+    } else {
+      setOpen(true)
+    }
+  }
 
   return (
     <>
       <button
         className="chatbot-fab"
-        onClick={() => setOpen((o) => !o)}
+        onClick={toggle}
         aria-label={open ? 'Close support chat' : 'Open support chat'}
       >
         {open ? <CloseIcon /> : <ChatIcon />}
@@ -34,10 +63,13 @@ export default function ChatbotWidget() {
 
       {open && (
         <div className="chatbot-popup">
+          {!loaded && <ChatbotSkeleton />}
           <iframe
             src={`https://www.chatbase.co/chatbot-iframe/${CHATBOT_ID}`}
             title="LifeLine Support"
             allow="microphone"
+            onLoad={() => setLoaded(true)}
+            style={{ opacity: loaded ? 1 : 0, transition: 'opacity 0.3s ease' }}
           />
         </div>
       )}

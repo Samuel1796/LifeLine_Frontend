@@ -1,10 +1,14 @@
 import { Link } from 'react-router-dom'
 
 function timeAgo(dateString) {
-  const seconds = Math.floor((Date.now() - new Date(dateString + 'Z').getTime()) / 1000)
+  if (!dateString) return ''
+  const s = dateString.endsWith('Z') ? dateString : dateString + 'Z'
+  const d = new Date(s)
+  if (isNaN(d.getTime())) return ''
+  const seconds = Math.floor((Date.now() - d.getTime()) / 1000)
   if (seconds < 60) return 'just now'
   const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return `${minutes} min ago`
+  if (minutes < 60) return `${minutes}min ago`
   const hours = Math.floor(minutes / 60)
   if (hours < 24) return `${hours}h ago`
   return `${Math.floor(hours / 24)}d ago`
@@ -12,7 +16,7 @@ function timeAgo(dateString) {
 
 export default function RequestCard({ request, actions }) {
   return (
-    <div className="glass lift request-card">
+    <div className={`glass lift request-card urgency-${request.urgency.toLowerCase()}`}>
       <div className="request-head">
         <span className="badge-blood">{request.bloodType}</span>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
