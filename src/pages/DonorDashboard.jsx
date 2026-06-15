@@ -2,14 +2,11 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api'
 import { useToast } from '../ToastContext'
-import { useNotify } from '../NotificationsContext'
-import { useNotifications } from '../useNotifications'
 import RequestCard from '../components/RequestCard'
 import { SkeletonGrid } from '../components/Skeletons'
 
 export default function DonorDashboard() {
   const toast = useToast()
-  const notify = useNotify()
   const [profile, setProfile] = useState(null)
   const [profileMissing, setProfileMissing] = useState(false)
   const [requests, setRequests] = useState(null)
@@ -34,22 +31,16 @@ export default function DonorDashboard() {
     loadRequests()
   }, [loadRequests, toast])
 
-  useNotifications({
-    onNewRequest: (req) => {
-      const msg = req.isDirect
-        ? `You were asked directly: ${req.bloodType} blood for ${req.patientName}`
-        : `Urgent: ${req.bloodType} blood needed for ${req.patientName}`
-      toast(msg, 'alert')
-      notify.add(msg, 'alert')
-      loadRequests()
-    },
-    onRequestResolved: ({ status }) => {
-      const msg = `A request you accepted was marked ${status.toLowerCase()}.`
-      toast(msg, 'info')
-      notify.add(msg, 'info')
-      loadRequests()
-    },
-  })
+  useEffect(() => {
+    function onNewRequest() { loadRequests() }
+    function onRequestResolved() { loadRequests() }
+    window.addEventListener('lifeline:newRequest', onNewRequest)
+    window.addEventListener('lifeline:requestResolved', onRequestResolved)
+    return () => {
+      window.removeEventListener('lifeline:newRequest', onNewRequest)
+      window.removeEventListener('lifeline:requestResolved', onRequestResolved)
+    }
+  }, [loadRequests])
 
   async function toggleAvailability(isAvailable) {
     try {

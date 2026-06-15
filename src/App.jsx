@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider, useAuth } from './AuthContext'
 import { ToastProvider } from './ToastContext'
 import { NotificationsProvider } from './NotificationsContext'
+import NotificationGateway from './NotificationGateway'
 import Navbar from './components/Navbar'
 import ChatbotWidget from './components/ChatbotWidget'
 import Landing from './pages/Landing'
@@ -37,6 +38,7 @@ export default function App() {
       <ToastProvider>
         <BrowserRouter>
           <RoleTheme />
+          <NotificationGateway />
           <Navbar />
           <ChatbotWidget />
           <main className="container">

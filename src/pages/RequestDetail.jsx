@@ -1,10 +1,8 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { api } from '../api'
 import { useAuth } from '../AuthContext'
 import { useToast } from '../ToastContext'
-import { useNotify } from '../NotificationsContext'
-import { useNotifications } from '../useNotifications'
 import { RequestCardSkeleton } from '../components/Skeletons'
 import ChatPanel from '../components/ChatPanel'
 
@@ -12,10 +10,10 @@ export default function RequestDetail() {
   const { id } = useParams()
   const { user } = useAuth()
   const toast = useToast()
-  const notify = useNotify()
   const [data, setData] = useState(null)
   const [busy, setBusy] = useState(false)
   const [openChatDonorId, setOpenChatDonorId] = useState(null)
+  const openChatDonorIdRef = useRef(null)
   const [incomingMsg, setIncomingMsg] = useState(null)
 
   const load = useCallback(async () => {
@@ -30,21 +28,30 @@ export default function RequestDetail() {
     load()
   }, [load])
 
-  useNotifications({
-    onDonorResponded: ({ requestId }) => {
-      if (String(requestId) === String(id)) load()
-    },
-    onNewMessage: (payload) => {
+  useEffect(() => {
+    openChatDonorIdRef.current = openChatDonorId
+  }, [openChatDonorId])
+
+  useEffect(() => {
+    function onDonorResponded(e) {
+      if (String(e.detail.requestId) === String(id)) load()
+    }
+    function onNewMessage(e) {
+      const payload = e.detail
       if (String(payload.requestId) !== String(id)) return
       setIncomingMsg(payload)
-      if (user?.role === 'Requester' && Number(openChatDonorId) !== Number(payload.donorId)) {
-        const msg = `New message from ${payload.message.senderName}`
-        toast(msg, 'info')
-        notify.add(msg, 'info')
+      if (user?.role === 'Requester' && Number(openChatDonorIdRef.current) !== Number(payload.donorId)) {
+        toast(`New message from ${payload.message.senderName}`, 'info')
         setOpenChatDonorId(payload.donorId)
       }
-    },
-  })
+    }
+    window.addEventListener('lifeline:donorResponded', onDonorResponded)
+    window.addEventListener('lifeline:newMessage', onNewMessage)
+    return () => {
+      window.removeEventListener('lifeline:donorResponded', onDonorResponded)
+      window.removeEventListener('lifeline:newMessage', onNewMessage)
+    }
+  }, [id, user, load, toast])
 
   async function respond(accept) {
     setBusy(true)
