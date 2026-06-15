@@ -4,7 +4,10 @@ import { useAuth } from '../AuthContext'
 import { useToast } from '../ToastContext'
 
 function formatTime(dateString) {
-  return new Date(dateString + 'Z').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  if (!dateString) return ''
+  const s = dateString.endsWith('Z') ? dateString : dateString + 'Z'
+  const d = new Date(s)
+  return isNaN(d.getTime()) ? '' : d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
 
 /**

@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import { api } from './api'
 import { AuthProvider, useAuth } from './AuthContext'
 import { ToastProvider } from './ToastContext'
 import Navbar from './components/Navbar'
+import ChatbotWidget from './components/ChatbotWidget'
 import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -13,30 +13,10 @@ import RequesterDashboard from './pages/RequesterDashboard'
 import NewRequest from './pages/NewRequest'
 import RequestDetail from './pages/RequestDetail'
 
-// Tints the page background per role so donor and requester screens
-// are recognisable at a glance.
 function RoleTheme() {
   const { user } = useAuth()
   useEffect(() => {
     document.body.dataset.role = user?.role || ''
-  }, [user])
-  return null
-}
-
-// Tells the Chatbase widget who the logged-in user is, using a token
-// signed by our backend (identity verification).
-function ChatbaseIdentity() {
-  const { user } = useAuth()
-  useEffect(() => {
-    if (!user || !window.chatbase) return
-    api
-      .chatbaseToken()
-      .then(({ token }) => {
-        if (token) window.chatbase('identify', { token })
-      })
-      .catch(() => {
-        /* chatbot simply stays unidentified */
-      })
   }, [user])
   return null
 }
@@ -55,8 +35,8 @@ export default function App() {
       <ToastProvider>
         <BrowserRouter>
           <RoleTheme />
-          <ChatbaseIdentity />
           <Navbar />
+          <ChatbotWidget />
           <main className="container">
             <Routes>
               <Route path="/" element={<Landing />} />
