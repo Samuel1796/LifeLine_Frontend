@@ -1,97 +1,87 @@
-import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider, useAuth } from './AuthContext'
 import { ToastProvider } from './ToastContext'
-import { NotificationsProvider } from './NotificationsContext'
-import NotificationGateway from './NotificationGateway'
+import LiveUpdates from './components/LiveUpdates'
 import Navbar from './components/Navbar'
-import ChatbotWidget from './components/ChatbotWidget'
 import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Register from './pages/Register'
-import DonorDashboard from './pages/DonorDashboard'
-import DonorProfile from './pages/DonorProfile'
-import RequesterDashboard from './pages/RequesterDashboard'
-import NewRequest from './pages/NewRequest'
-import RequestDetail from './pages/RequestDetail'
+import Explore from './pages/Explore'
+import MyBookings from './pages/MyBookings'
+import Manage from './pages/Manage'
 
-function RoleTheme() {
-  const { user } = useAuth()
-  useEffect(() => {
-    document.body.dataset.role = user?.role || ''
-  }, [user])
-  return null
-}
-
-function RequireRole({ role, children }) {
+function RequireAuth({ children }) {
   const { user } = useAuth()
   if (!user) return <Navigate to="/login" replace />
-  if (role && user.role !== role)
-    return <Navigate to={user.role === 'Donor' ? '/donor' : '/requester'} replace />
+  return children
+}
+
+function RequireManager({ children }) {
+  const { user } = useAuth()
+  if (!user) return <Navigate to="/login" replace />
+  if (user.role !== 'Manager') return <Navigate to="/spaces" replace />
+  return children
+}
+
+function GuestOnly({ children }) {
+  const { user } = useAuth()
+  if (user) return <Navigate to="/spaces" replace />
   return children
 }
 
 export default function App() {
   return (
     <AuthProvider>
-      <NotificationsProvider>
       <ToastProvider>
         <BrowserRouter>
-          <RoleTheme />
-          <NotificationGateway />
+          <LiveUpdates />
           <Navbar />
-          <ChatbotWidget />
-          <main className="container">
-            <Routes>
-              <Route path="/" element={<Landing />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route
-                path="/donor"
-                element={
-                  <RequireRole role="Donor">
-                    <DonorDashboard />
-                  </RequireRole>
-                }
-              />
-              <Route
-                path="/donor/profile"
-                element={
-                  <RequireRole role="Donor">
-                    <DonorProfile />
-                  </RequireRole>
-                }
-              />
-              <Route
-                path="/requester"
-                element={
-                  <RequireRole role="Requester">
-                    <RequesterDashboard />
-                  </RequireRole>
-                }
-              />
-              <Route
-                path="/requests/new"
-                element={
-                  <RequireRole role="Requester">
-                    <NewRequest />
-                  </RequireRole>
-                }
-              />
-              <Route
-                path="/requests/:id"
-                element={
-                  <RequireRole>
-                    <RequestDetail />
-                  </RequireRole>
-                }
-              />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </main>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route
+              path="/login"
+              element={
+                <GuestOnly>
+                  <Login />
+                </GuestOnly>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <GuestOnly>
+                  <Register />
+                </GuestOnly>
+              }
+            />
+            <Route
+              path="/spaces"
+              element={
+                <RequireAuth>
+                  <Explore />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/bookings"
+              element={
+                <RequireAuth>
+                  <MyBookings />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/manage"
+              element={
+                <RequireManager>
+                  <Manage />
+                </RequireManager>
+              }
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
         </BrowserRouter>
       </ToastProvider>
-      </NotificationsProvider>
     </AuthProvider>
   )
 }

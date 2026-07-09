@@ -4,9 +4,10 @@ import { API_BASE } from './api'
 import { useAuth } from './AuthContext'
 
 /**
- * Opens a SignalR connection while the user is logged in and forwards
- * server events ("NewRequest", "DonorResponded", "RequestResolved")
- * to the provided handlers.
+ * Opens a SignalR connection while the user is signed in and forwards the
+ * server events ("spaceBooked", "bookingCancelled") to the given handlers.
+ * The JWT travels as the access_token query param on /hubs/notifications
+ * (the signalR client appends it from accessTokenFactory).
  */
 export function useNotifications(handlers) {
   const { user } = useAuth()
@@ -23,10 +24,10 @@ export function useNotifications(handlers) {
       .withAutomaticReconnect()
       .build()
 
-    connection.on('NewRequest', (payload) => handlersRef.current.onNewRequest?.(payload))
-    connection.on('DonorResponded', (payload) => handlersRef.current.onDonorResponded?.(payload))
-    connection.on('RequestResolved', (payload) => handlersRef.current.onRequestResolved?.(payload))
-    connection.on('NewMessage', (payload) => handlersRef.current.onNewMessage?.(payload))
+    connection.on('spaceBooked', (payload) => handlersRef.current.onSpaceBooked?.(payload))
+    connection.on('bookingCancelled', (payload) =>
+      handlersRef.current.onBookingCancelled?.(payload)
+    )
 
     // React StrictMode mounts effects twice in dev; the first connection is
     // torn down mid-negotiation, which is expected — only log real failures.

@@ -1,57 +1,104 @@
 import { Link } from 'react-router-dom'
-import { useAuth } from '../AuthContext'
 
+// Editorial one-pager per DESIGN.md §3.1. The board is static markup — it
+// demonstrates the status language before signup, so it stays aria-hidden.
 export default function Landing() {
-  const { user } = useAuth()
-
   return (
-    <div className="page">
-      <section className="hero">
-        <h1>
-          Every drop counts.
-          <br />
-          <span className="accent-text">Find a donor in minutes.</span>
-        </h1>
-        <p>
-          LifeLine connects people who urgently need blood with nearby, compatible donors —
-          matched by blood type and location, and alerted the moment a request goes out.
-        </p>
-        <div className="hero-cta">
-          {user ? (
-            <Link to={user.role === 'Donor' ? '/donor' : '/requester'} className="btn btn-primary">
-              Go to your dashboard
-            </Link>
-          ) : (
-            <>
-              <Link to="/register?role=Donor" className="btn btn-primary">
-                Become a donor
-              </Link>
-              <Link to="/register?role=Requester" className="btn btn-ghost">
-                I need blood
-              </Link>
-            </>
-          )}
-        </div>
+    <>
+      <main className="container page">
+        <section className="masthead">
+          <div className="masthead-grid">
+            <div>
+              <p className="kicker">Desk booking for the office</p>
+              <h1 className="masthead-title">Find your spot.</h1>
+              <p className="masthead-lede">
+                Nook shows you every desk on the floor — who's at them, and until when. Pick a
+                free one, book it, done.
+              </p>
+              <div className="masthead-cta">
+                <Link className="btn btn-accent btn-lg" to="/register">
+                  Create account
+                </Link>
+                <Link className="btn btn-outline btn-lg" to="/login">
+                  Sign in
+                </Link>
+              </div>
+            </div>
+            <div className="board" aria-hidden="true">
+              <div className="board-head">
+                <span className="board-title">The Studio</span>
+                <span className="board-caption tnum">Today, 09:41</span>
+              </div>
+              <div className="board-row">
+                <span className="status-dot free"></span>
+                <span className="board-name">Desk 1</span>
+                <span className="status-text free">Free</span>
+              </div>
+              <div className="board-row">
+                <span className="status-dot taken"></span>
+                <span className="board-name">Desk 2</span>
+                <span className="status-text taken tnum">Busy until 17:00</span>
+              </div>
+              <div className="board-row">
+                <span className="status-dot yours"></span>
+                <span className="board-name">Desk 3</span>
+                <span className="stamp stamp-yours">Yours</span>
+              </div>
+            </div>
+          </div>
+        </section>
 
-        <div className="stat-row">
-          <div className="glass stat-card">
-            <div className="num">1 in 7</div>
-            <div className="label">hospital patients need blood</div>
+        <section className="steps">
+          <div className="step">
+            <span className="step-num" aria-hidden="true">
+              01
+            </span>
+            <h2 className="step-title">See the board</h2>
+            <p className="step-text">Five offices, fifteen desks, live. Green dot means go.</p>
           </div>
-          <div className="glass stat-card">
-            <div className="num">3 lives</div>
-            <div className="label">saved by a single donation</div>
+          <div className="step">
+            <span className="step-num" aria-hidden="true">
+              02
+            </span>
+            <h2 className="step-title">Pick a window</h2>
+            <p className="step-text">Right now, the morning, the whole day — your call.</p>
           </div>
-          <div className="glass stat-card">
-            <div className="num">50 km</div>
-            <div className="label">smart proximity matching</div>
+          <div className="step">
+            <span className="step-num" aria-hidden="true">
+              03
+            </span>
+            <h2 className="step-title">Sit down</h2>
+            <p className="step-text">Booked in two clicks. Cancel in one if plans change.</p>
           </div>
-          <div className="glass stat-card">
-            <div className="num">Live</div>
-            <div className="label">instant donor alerts</div>
+        </section>
+
+        <section className="fact-strip">
+          <div className="fact">
+            <span className="fact-num tnum">5</span>
+            <span className="fact-label">Offices</span>
           </div>
+          <div className="fact">
+            <span className="fact-num tnum">15</span>
+            <span className="fact-label">Desks</span>
+          </div>
+          <div className="fact">
+            <span className="fact-num tnum">12h</span>
+            <span className="fact-label">Max booking</span>
+          </div>
+          <div className="fact">
+            <span className="fact-num tnum">2</span>
+            <span className="fact-label">Clicks to book</span>
+          </div>
+        </section>
+      </main>
+      <footer className="footer">
+        <div className="container footer-inner">
+          <span className="footer-brand">
+            <span className="brand-mark" aria-hidden="true"></span>Nook
+          </span>
+          <span className="footer-note">Made for people who like a good desk.</span>
         </div>
-      </section>
-    </div>
+      </footer>
+    </>
   )
 }

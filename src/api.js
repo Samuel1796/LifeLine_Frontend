@@ -7,6 +7,17 @@ function getToken() {
   return localStorage.getItem('token')
 }
 
+// Builds "?a=1&b=2" from an object, skipping null/undefined/empty values.
+function qs(params) {
+  if (!params) return ''
+  const search = new URLSearchParams()
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null && value !== '') search.set(key, value)
+  }
+  const str = search.toString()
+  return str ? `?${str}` : ''
+}
+
 async function request(path, { method = 'GET', body } = {}) {
   const headers = { 'Content-Type': 'application/json' }
   const token = getToken()
@@ -28,7 +39,8 @@ async function request(path, { method = 'GET', body } = {}) {
   }
 
   if (!res.ok) {
-    const message = data?.message || data?.title || `Request failed (${res.status})`
+    // The API reports every failure as { "error": string }.
+    const message = data?.error || `Request failed (${res.status})`
     const error = new Error(message)
     error.status = res.status
     throw error
@@ -38,42 +50,23 @@ async function request(path, { method = 'GET', body } = {}) {
 }
 
 export const api = {
+  // auth
   register: (payload) => request('/api/auth/register', { method: 'POST', body: payload }),
   login: (payload) => request('/api/auth/login', { method: 'POST', body: payload }),
-  me: () => request('/api/auth/me'),
-  chatbaseToken: () => request('/api/auth/chatbase-token'),
 
-  donorsMap: () => request('/api/donors/map'),
-  getMyDonorProfile: () => request('/api/donors/me/profile'),
-  saveDonorProfile: (payload) => request('/api/donors/me/profile', { method: 'PUT', body: payload }),
-  setAvailability: (isAvailable) =>
-    request('/api/donors/me/availability', { method: 'PATCH', body: { isAvailable } }),
+  // building — one implicit floor, 5 offices x 3 desks (Rev 2)
+  offices: () => request('/api/offices'),
+  spaces: (params) => request(`/api/spaces${qs(params)}`), // {from, to, officeId, includeInactive}
+  spaceDetail: (id, date) => request(`/api/spaces/${id}${qs({ date })}`),
 
-  createRequest: (payload) => request('/api/requests', { method: 'POST', body: payload }),
-  myRequests: () => request('/api/requests/mine'),
-  matchedRequests: () => request('/api/requests/matched'),
-  requestDetail: (id) => request(`/api/requests/${id}`),
-  respond: (id, accept) => request(`/api/requests/${id}/respond`, { method: 'POST', body: { accept } }),
-  updateStatus: (id, status) =>
-    request(`/api/requests/${id}/status`, { method: 'PATCH', body: { status } }),
+  // manager
+  createSpace: (payload) => request('/api/spaces', { method: 'POST', body: payload }),
+  updateSpace: (id, payload) => request(`/api/spaces/${id}`, { method: 'PUT', body: payload }),
+  occupancy: (date) => request(`/api/spaces/occupancy${qs({ date })}`),
+  allBookings: (date) => request(`/api/bookings/all${qs({ date })}`),
 
-  getMessages: (id, donorId) =>
-    request(`/api/requests/${id}/messages${donorId ? `?donorId=${donorId}` : ''}`),
-  sendMessage: (id, donorId, text) =>
-    request(`/api/requests/${id}/messages`, { method: 'POST', body: { donorId, text } }),
-}
-
-// Turns coordinates into a human-readable city/area name using OpenStreetMap.
-export async function reverseGeocode(lat, lng) {
-  try {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`,
-      { headers: { Accept: 'application/json' } }
-    )
-    const data = await res.json()
-    const a = data.address || {}
-    return a.city || a.town || a.village || a.suburb || a.county || a.state || ''
-  } catch {
-    return ''
-  }
+  // bookings
+  createBooking: (payload) => request('/api/bookings', { method: 'POST', body: payload }),
+  myBookings: () => request('/api/bookings/mine'),
+  cancelBooking: (id) => request(`/api/bookings/${id}/cancel`, { method: 'PATCH' }),
 }

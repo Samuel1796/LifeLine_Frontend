@@ -1,156 +1,163 @@
 import { useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
-
-function EyeIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-      <circle cx="12" cy="12" r="3"/>
-    </svg>
-  )
-}
-
-function EyeOffIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
-      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-      <line x1="1" y1="1" x2="23" y2="23"/>
-    </svg>
-  )
-}
 
 export default function Register() {
   const { register } = useAuth()
   const navigate = useNavigate()
-  const [params] = useSearchParams()
-
-  const [form, setForm] = useState({
-    fullName: '',
-    email: '',
-    password: '',
-    phone: '',
-    role: params.get('role') === 'Requester' ? 'Requester' : 'Donor',
-  })
-  const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState(null)
+  const [fullName, setFullName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [department, setDepartment] = useState('')
+  const [role, setRole] = useState('Employee')
+  const [errors, setErrors] = useState({})
+  const [apiError, setApiError] = useState('')
   const [busy, setBusy] = useState(false)
 
-  function set(key, value) {
-    setForm((f) => ({ ...f, [key]: value }))
-  }
-
-  async function handleSubmit(e) {
+  async function onSubmit(e) {
     e.preventDefault()
-    setError(null)
+    const errs = {}
+    if (!fullName.trim()) errs.fullName = 'Tell us your name.'
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) errs.email = "That doesn't look like an email."
+    if (password.length < 8) errs.password = 'At least 8 characters.'
+    setErrors(errs)
+    if (Object.keys(errs).length > 0) return
+
     setBusy(true)
+    setApiError('')
     try {
-      const user = await register(form)
-      navigate(user.role === 'Donor' ? '/donor/profile' : '/requester')
+      const payload = {
+        fullName: fullName.trim(),
+        email: email.trim(),
+        password,
+        role,
+      }
+      if (department.trim()) payload.department = department.trim()
+      await register(payload)
+      navigate('/spaces')
     } catch (err) {
-      setError(err.message)
+      setApiError(err.message)
     } finally {
       setBusy(false)
     }
   }
 
   return (
-    <div className="page">
-      <div className="glass form-card">
-        <h2 style={{ marginBottom: 6 }}>Create your account</h2>
-        <p className="muted small" style={{ marginBottom: 22 }}>
-          Join the network in under a minute.
-        </p>
-
-        {error && <div className="form-error">{error}</div>}
-
-        <form onSubmit={handleSubmit}>
-          <div className="field">
-            <label>I want to…</label>
-            <div className="form-row">
-              <button
-                type="button"
-                className={`blood-option ${form.role === 'Donor' ? 'selected' : ''}`}
-                onClick={() => set('role', 'Donor')}
-              >
-                Donate blood
-              </button>
-              <button
-                type="button"
-                className={`blood-option ${form.role === 'Requester' ? 'selected' : ''}`}
-                onClick={() => set('role', 'Requester')}
-              >
-                Request blood
-              </button>
-            </div>
-          </div>
-
-          <div className="field">
-            <label>Full name</label>
-            <input
-              value={form.fullName}
-              onChange={(e) => set('fullName', e.target.value)}
-              placeholder="Ama Owusu"
-              required
-              minLength={2}
-            />
-          </div>
-
-          <div className="field">
-            <label>Email</label>
-            <input
-              type="email"
-              value={form.email}
-              onChange={(e) => set('email', e.target.value)}
-              placeholder="you@example.com"
-              required
-            />
-          </div>
-
-          <div className="field">
-            <label>Password</label>
-            <div className="password-wrap">
+    <main className="container-narrow auth-wide page auth-page">
+      <div className="auth-card">
+        <p className="kicker">Nook</p>
+        <h1 className="auth-title">Create account</h1>
+        {apiError && <div className="alert alert-error">{apiError}</div>}
+        <form onSubmit={onSubmit} noValidate>
+          <div className="form-row">
+            <div className="field">
+              <label className="field-label" htmlFor="fullName">
+                Full name
+              </label>
               <input
-                type={showPassword ? 'text' : 'password'}
-                value={form.password}
-                onChange={(e) => set('password', e.target.value)}
-                placeholder="6+ characters"
-                required
-                minLength={6}
+                className={`input${errors.fullName ? ' is-invalid' : ''}`}
+                id="fullName"
+                autoComplete="name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
               />
-              <button
-                type="button"
-                className="eye-btn"
-                onClick={() => setShowPassword((p) => !p)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-              >
-                {showPassword ? <EyeOffIcon /> : <EyeIcon />}
-              </button>
+              {errors.fullName && <p className="field-error">{errors.fullName}</p>}
+            </div>
+            <div className="field">
+              <label className="field-label" htmlFor="email">
+                Email
+              </label>
+              <input
+                className={`input${errors.email ? ' is-invalid' : ''}`}
+                id="email"
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              {errors.email && <p className="field-error">{errors.email}</p>}
             </div>
           </div>
-
-          <div className="field">
-            <label>Phone <span className="muted">(optional)</span></label>
-            <input
-              value={form.phone}
-              onChange={(e) => set('phone', e.target.value)}
-              placeholder="+233 20 123 4567"
-            />
+          <div className="form-row">
+            <div className="field">
+              <label className="field-label" htmlFor="password">
+                Password
+              </label>
+              <input
+                className={`input${errors.password ? ' is-invalid' : ''}`}
+                id="password"
+                type="password"
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              {errors.password ? (
+                <p className="field-error">{errors.password}</p>
+              ) : (
+                <p className="field-hint">At least 8 characters.</p>
+              )}
+            </div>
+            <div className="field">
+              <label className="field-label" htmlFor="department">
+                Department <span className="field-optional">(optional)</span>
+              </label>
+              <input
+                className="input"
+                id="department"
+                autoComplete="organization-title"
+                value={department}
+                onChange={(e) => setDepartment(e.target.value)}
+              />
+              <p className="field-hint">Optional — helps managers plan.</p>
+            </div>
           </div>
-
-          <button className="btn btn-primary" style={{ width: '100%' }} disabled={busy}>
+          <div className="field">
+            <span className="field-label">Role</span>
+            <div className="choice-row" role="radiogroup" aria-label="Role">
+              <label className="choice">
+                <input
+                  type="radio"
+                  name="role"
+                  value="Employee"
+                  checked={role === 'Employee'}
+                  onChange={() => setRole('Employee')}
+                />
+                <span className="choice-body">
+                  <strong>Employee</strong>
+                  <span>Book desks</span>
+                </span>
+              </label>
+              <label className="choice">
+                <input
+                  type="radio"
+                  name="role"
+                  value="Manager"
+                  checked={role === 'Manager'}
+                  onChange={() => setRole('Manager')}
+                />
+                <span className="choice-body">
+                  <strong>Manager</strong>
+                  <span>Plus manage desks and occupancy</span>
+                </span>
+              </label>
+            </div>
+          </div>
+          <button
+            className="btn btn-primary btn-block"
+            type="submit"
+            disabled={busy}
+            aria-busy={busy || undefined}
+          >
             {busy ? 'Creating account…' : 'Create account'}
           </button>
         </form>
-
-        <p className="muted small" style={{ marginTop: 18, textAlign: 'center' }}>
-          Already registered?{' '}
-          <Link to="/login" style={{ color: 'var(--accent)' }}>
-            Log in
+        <p className="auth-alt">
+          Already set up?{' '}
+          <Link className="text-link" to="/login">
+            Sign in
           </Link>
         </p>
       </div>
-    </div>
+    </main>
   )
 }

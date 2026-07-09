@@ -1,36 +1,53 @@
-export function RequestCardSkeleton() {
-  return (
-    <div className="glass skeleton-card">
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-        <div className="skeleton sk-badge" />
-        <div className="skeleton sk-line w40" style={{ height: 22, width: 90 }} />
-      </div>
-      <div className="skeleton sk-line w80" />
-      <div className="skeleton sk-line w60" />
-      <div className="skeleton sk-line w40" />
-      <div className="skeleton sk-btn" />
-    </div>
-  )
-}
+// Loading placeholders per DESIGN.md §2.14 — never spinners.
 
-export function SkeletonGrid({ count = 3 }) {
+export function ExploreSkeleton({ count = 5 }) {
   return (
-    <div className="grid-cards">
+    <div className="office-grid" aria-hidden="true">
       {Array.from({ length: count }, (_, i) => (
-        <RequestCardSkeleton key={i} />
+        <section className="office-section" key={i}>
+          <div className="office-head">
+            <div className="skel skel-line w-40" />
+          </div>
+          <ul className="desk-grid">
+            {Array.from({ length: 3 }, (_, j) => (
+              <li className="desk-cell" key={j}>
+                <div className="skel skel-desk" />
+              </li>
+            ))}
+          </ul>
+        </section>
       ))}
     </div>
   )
 }
 
-export function ProfileSkeleton() {
+export function TicketsSkeleton({ count = 3 }) {
   return (
-    <div className="glass skeleton-card form-card">
-      <div className="skeleton sk-line w40" style={{ height: 24 }} />
-      <div className="skeleton sk-line" style={{ height: 46 }} />
-      <div className="skeleton sk-line" style={{ height: 46 }} />
-      <div className="skeleton sk-line w60" style={{ height: 46 }} />
-      <div className="skeleton sk-btn" />
+    <div aria-hidden="true">
+      {Array.from({ length: count }, (_, i) => (
+        <div className="skel skel-ticket" key={i} />
+      ))}
+    </div>
+  )
+}
+
+export function ManagerSkeleton() {
+  return (
+    <div aria-hidden="true">
+      <div className="skel skel-block" />
+      {Array.from({ length: 5 }, (_, i) => (
+        <div className="skel skel-line" key={i} />
+      ))}
+    </div>
+  )
+}
+
+export function DrawerSkeleton() {
+  return (
+    <div aria-hidden="true">
+      <div className="skel skel-line w-40" />
+      <div className="skel skel-line w-80" />
+      <div className="skel skel-line w-60" />
     </div>
   )
 }

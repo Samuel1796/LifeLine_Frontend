@@ -4,6 +4,8 @@ const ToastContext = createContext(null)
 
 let nextId = 1
 
+// Toasts per DESIGN.md §2.12: fixed bottom-right stack, auto-dismiss after
+// 5s, variants success / error / info. Usage: toast('Booked. …', 'success')
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([])
   const timers = useRef({})
@@ -26,13 +28,13 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={toast}>
       {children}
-      <div className="toast-stack">
+      <div className="toast-stack" role="status" aria-live="polite">
         {toasts.map((t) => (
-          <div key={t.id} className={`toast toast-${t.type}`} onClick={() => dismiss(t.id)}>
-            <span className="toast-icon">
-              {t.type === 'success' ? '✓' : t.type === 'error' ? '✕' : t.type === 'alert' ? '!' : 'i'}
-            </span>
-            <span>{t.message}</span>
+          <div key={t.id} className={`toast toast-${t.type}`}>
+            <p className="toast-msg">{t.message}</p>
+            <button className="toast-close" aria-label="Dismiss" onClick={() => dismiss(t.id)}>
+              ×
+            </button>
           </div>
         ))}
       </div>

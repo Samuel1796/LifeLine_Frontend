@@ -1,6 +1,7 @@
 import { createContext, useContext, useState } from 'react'
 import { api } from './api'
 
+// user shape: { id, fullName, email, role: 'Employee' | 'Manager', department }
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
