@@ -39,10 +39,13 @@ async function request(path, { method = 'GET', body } = {}) {
   }
 
   if (!res.ok) {
-    // The API reports every failure as { "error": string }.
+    // The API reports every failure as { "error": string }, though some
+    // 409s (Rev 3: OwnBookingConflict) carry extra structured fields —
+    // attach the full parsed body so callers can inspect `.body?.code` etc.
     const message = data?.error || `Request failed (${res.status})`
     const error = new Error(message)
     error.status = res.status
+    error.body = data
     throw error
   }
 
